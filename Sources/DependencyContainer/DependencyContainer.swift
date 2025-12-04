@@ -9,15 +9,16 @@ import Foundation
 
 public typealias DC = DependencyContainer
 
-public final class DependencyContainer {
+public final class DependencyContainer: @unchecked Sendable {
     
-    public let shared = DependencyContainer()
+    public static let shared = DependencyContainer()
     
     private init() {}
     
-    public var singleInstanceDependencies: [ObjectIdentifier: AnyObject] = [:]
-    public var closureBasedDependencies: [ObjectIdentifier: () -> Any] = [:]
-    private var dependencyAccessQueue = DispatchQueue(
+    private var singleInstanceDependencies: [ObjectIdentifier: AnyObject] = [:]
+    private var closureBasedDependencies: [ObjectIdentifier: () -> Any] = [:]
+    
+    private let dependencyAccessQueue = DispatchQueue(
         label: "com.dependency.container.access.queue",
         attributes: .concurrent
     )
@@ -25,12 +26,12 @@ public final class DependencyContainer {
     public func register(type: DependencyContainerReqistrationType, for interface: Any.Type) {
         let identifier = ObjectIdentifier(interface)
         
-        dependencyAccessQueue.sync(flags: .barrier) {
+        dependencyAccessQueue.async(flags: .barrier) {
             switch type {
             case .singleInstance(let instance):
-                singleInstanceDependencies[identifier] = instance
+                self.singleInstanceDependencies[identifier] = instance
             case .closureBased(let closure):
-                closureBasedDependencies[identifier] = closure
+                self.closureBasedDependencies[identifier] = closure
             }
         }
     }
