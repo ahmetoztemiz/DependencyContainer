@@ -13,7 +13,7 @@ public final class DependencyContainer: @unchecked Sendable {
     
     public static let shared = DependencyContainer()
     
-    private init() {}
+    init() {}
     
     private var singleInstanceDependencies: [ObjectIdentifier: AnyObject] = [:]
     private var closureBasedDependencies: [ObjectIdentifier: () -> Any] = [:]
